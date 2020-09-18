@@ -13,7 +13,7 @@ build-spark-worker: build-spark-base
 build-jupyterlab:
 	docker build -t jupyterlab -f docker/Dockerfile.jupyterlab .
 
-up: build-base build-spark-base build-spark-worker build-jupyterlab down
+up: build-spark-master build-spark-worker build-jupyterlab down
 	docker-compose up
 
 down:
