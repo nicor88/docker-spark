@@ -2,8 +2,8 @@ FROM base
 
 # -- Layer: Apache Spark
 
-ENV spark_version=3.0.0
-ENV hadoop_version=2.7
+ARG spark_version=3.0.0
+ARG hadoop_version=2.7
 
 # update kernel
 RUN apt-get update -y && \
