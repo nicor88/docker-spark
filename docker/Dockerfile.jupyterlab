@@ -5,13 +5,14 @@ FROM base
 ARG spark_version=3.0.0
 ARG jupyterlab_version=2.1.5
 
-RUN apt-get update -y && \
-    apt-get install -y python3-pip
+# RUN apt-get update -y && \
+#     apt-get install -y python3-pip
 
 RUN pip3 install pyspark==${spark_version} jupyterlab==${jupyterlab_version}
 
 # add extra libraries
-RUN pip3 install wget pandas==1.1.2 
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt
 
 # -- Runtime
 

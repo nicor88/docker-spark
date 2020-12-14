@@ -1,19 +1,33 @@
-ARG debian_buster_image_tag=8-jre-slim
+ARG debian_buster_image_tag=11.0.9.1-jre-buster
+
 FROM openjdk:${debian_buster_image_tag}
 
-# -- Layer: OS + Python 3.7
+RUN apt-get update -y && apt-get upgrade -y
 
-ARG shared_workspace=/opt/workspace
+## build python, only needed if you need recent version
+ENV PYTHON_VERSION=3.8.6
 
-RUN mkdir -p ${shared_workspace} && \
-    apt-get update -y && \
-    apt-get install -y python3 && \
-    ln -s /usr/bin/python3 /usr/bin/python && \
+RUN apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev && \
     rm -rf /var/lib/apt/lists/*
 
+RUN curl -O https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz && tar -xf Python-${PYTHON_VERSION}.tar.xz -C /
+WORKDIR /Python-${PYTHON_VERSION}
+RUN ./configure --enable-optimizations --with-ensurepip=install && make -j 4 && make altinstall
+RUN rm -rf /Python-${PYTHON_VERSION} && rm -f /Python-${PYTHON_VERSION}.tar.xz
+RUN ln -s /usr/local/bin/python3.8 /usr/local/bin/python && ln -s /usr/local/bin/python3.8 /usr/bin/python3
+RUN ln -s /usr/local/bin/pip3.8 /usr/local/bin/pip && ln -s /usr/local/bin/pip3.8 /usr/bin/pip3
+
+
+WORKDIR /
+# NOTE fallback to that to use a not recent version of Python
+# RUN apt-get install -y python3 && \
+#     ln -s /usr/bin/python3 /usr/bin/python && \
+#     rm -rf /var/lib/apt/lists/*
+
+ARG shared_workspace=/opt/workspace
+RUN mkdir -p ${shared_workspace}
 ENV SHARED_WORKSPACE=${shared_workspace}
 
 # -- Runtime
-
 VOLUME ${shared_workspace}
 CMD ["bash"]
